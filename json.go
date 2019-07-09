@@ -8,14 +8,17 @@ import (
 )
 
 type JSON struct {
-	RawJson       []byte                                              // JSON 原文
-	RegisterRules map[string]func(string, interface{}) (bool, string) // 已注册的规则
+	RawJson       []byte                                                      // JSON 原文
+	RegisterRules map[string]func(string, string, interface{}) (bool, string) // 已注册的规则
 }
 
-func NewJSON(json []byte, rules map[string]func(string, interface{}) (bool, string)) *JSON {
+func NewJSON(json []byte, rules map[string]func(string, string, interface{}) (bool, string)) *JSON {
 	var result JSON
 	result.RawJson = json
-	result.RegisterRules = rules
+	result.RegisterRules = builtinRules
+	for ruleName, ruleFunc := range rules {
+		result.RegisterRules[ruleName] = ruleFunc
+	}
 	return &result
 }
 func (j *JSON) Valid(rule map[string][]string) (bool, []string) {
@@ -26,13 +29,7 @@ func (j *JSON) Valid(rule map[string][]string) (bool, []string) {
 	var errMsg []string
 	for fieldName, rulesOnField := range rule {
 		fieldPaths := strings.Split(fieldName, ".")
-		var currentJsonLevel *simplejson.Json
-		for _, oneField := range fieldPaths {
-			currentJsonLevel = sjson.Get(oneField)
-			if currentJsonLevel == nil {
-				break
-			}
-		}
+		currentJsonLevel := sjson.GetPath(fieldPaths...)
 		if currentJsonLevel == nil {
 			if stringInArray("required", rulesOnField) {
 				errMsg = append(errMsg, fmt.Sprintf(`field "%s" is required`, fieldName))
@@ -42,7 +39,7 @@ func (j *JSON) Valid(rule map[string][]string) (bool, []string) {
 		for _, oneRule := range rulesOnField {
 			ruleCommand := strings.Split(oneRule, ":")
 			if ruleFunc, ok := j.RegisterRules[ruleCommand[0]]; ok {
-				valid, errMessage := ruleFunc(oneRule, currentJsonLevel.Interface{})
+				valid, errMessage := ruleFunc(oneRule, fieldName, currentJsonLevel.Interface())
 				if !valid {
 					errMsg = append(errMsg, errMessage)
 				}
