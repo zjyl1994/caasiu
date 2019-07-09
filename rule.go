@@ -30,6 +30,7 @@ func init() {
 		"ascii":     ruleASCII,
 		"alpha":     ruleAlpha,
 		"numeric":   ruleNumeric,
+		"alphanum":  ruleAlphaNum,
 		"hexstring": ruleHexString,
 		"printable": rulePrintableASCII,
 		"base64":    ruleBase64,
@@ -156,6 +157,10 @@ func ruleASCII(ruleName string, fieldName string, value interface{}) (bool, stri
 
 func ruleAlpha(ruleName string, fieldName string, value interface{}) (bool, string) {
 	return basicRegexpRule(ruleName, fieldName, value, "^[a-zA-Z]+$", fmt.Sprintf(`field "%s" must alpha string`, fieldName))
+}
+
+func ruleAlphaNum(ruleName string, fieldName string, value interface{}) (bool, string) {
+	return basicRegexpRule(ruleName, fieldName, value, "^[0-9a-zA-Z]+$", fmt.Sprintf(`field "%s" must alphanum string`, fieldName))
 }
 
 func ruleNumeric(ruleName string, fieldName string, value interface{}) (bool, string) {

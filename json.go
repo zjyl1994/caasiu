@@ -11,16 +11,16 @@ type JSON struct {
 	rawJSON []byte
 }
 
-func NewJSON(json []byte, rules map[string]func(string, string, interface{}) (bool, string)) *JSON {
+func NewJSON(json []byte) *JSON {
 	var result JSON
 	result.rawJSON = json
 	return &result
 }
 
-func (j *JSON) Valid(rule map[string][]string) (bool, []string) {
+func (j *JSON) Valid(rule map[string][]string) []string {
 	sjson, err := simplejson.NewJson(j.rawJSON)
 	if err != nil {
-		return false, []string{err.Error()}
+		return []string{err.Error()}
 	}
 	var errMsg []string
 	for fieldName, rulesOnField := range rule {
@@ -44,11 +44,7 @@ func (j *JSON) Valid(rule map[string][]string) (bool, []string) {
 			}
 		}
 	}
-	if len(errMsg) > 0 {
-		return false, errMsg
-	} else {
-		return true, nil
-	}
+	return errMsg
 }
 
 func (j *JSON) Data() *simplejson.Json {

@@ -11,7 +11,7 @@ type QueryString struct {
 	data map[string]string
 }
 
-func NewQueryString(value url.Values, rules map[string]func(string, string, interface{}) (bool, string)) *QueryString {
+func NewQueryString(value url.Values) *QueryString {
 	var result QueryString
 	result.raw = value
 	// preprocess
@@ -24,7 +24,7 @@ func NewQueryString(value url.Values, rules map[string]func(string, string, inte
 	return &result
 }
 
-func (q *QueryString) Valid(rule map[string][]string) (bool, []string) {
+func (q *QueryString) Valid(rule map[string][]string) []string {
 	var errMsg []string
 	for fieldName, rulesOnField := range rule {
 		if len(rulesOnField) > 0 {
@@ -46,11 +46,7 @@ func (q *QueryString) Valid(rule map[string][]string) (bool, []string) {
 			}
 		}
 	}
-	if len(errMsg) > 0 {
-		return false, errMsg
-	} else {
-		return true, nil
-	}
+	return errMsg
 }
 
 func (q *QueryString) Data() map[string]string {
