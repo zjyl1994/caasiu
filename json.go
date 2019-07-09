@@ -30,7 +30,7 @@ func (j *JSON) Valid(rule map[string][]string) (bool, []string) {
 	for fieldName, rulesOnField := range rule {
 		fieldPaths := strings.Split(fieldName, ".")
 		currentJsonLevel := sjson.GetPath(fieldPaths...)
-		if currentJsonLevel == nil {
+		if currentJsonLevel.Interface() == nil {
 			if stringInArray("required", rulesOnField) {
 				errMsg = append(errMsg, fmt.Sprintf(`field "%s" is required`, fieldName))
 			}

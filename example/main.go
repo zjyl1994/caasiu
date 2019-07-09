@@ -23,6 +23,7 @@ func main() {
 		"data1.data2.data3": []string{"integer"},
 		"data1.data4":       []string{"integer"},
 		"data1.data5":       []string{"string", "integer"},
+		"data6.data7":       []string{"required"},
 	})
 	fmt.Println("VALID", valid)
 	fmt.Println("ERROR", errMsg)
