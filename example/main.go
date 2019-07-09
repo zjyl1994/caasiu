@@ -14,7 +14,9 @@ func main() {
 			},
 			"data4":67,
 			"data5":"7430893"
-		}
+		},
+		"data6":"3",
+		"data7":5
 	}
 	`
 	cs := caasiu.NewJSON([]byte(jsonStr), nil)
@@ -24,7 +26,11 @@ func main() {
 		"data1.data4":       []string{"integer"},
 		"data1.data5":       []string{"string", "integer"},
 		"data6.data7":       []string{"required"},
+		"data6":             []string{"in:3,5,7,9"},
+		"data7":             []string{"in:1,2,4,6"},
 	})
 	fmt.Println("VALID", valid)
-	fmt.Println("ERROR", errMsg)
+	for _, msg := range errMsg {
+		fmt.Println("ERROR", msg)
+	}
 }

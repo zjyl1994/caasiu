@@ -28,20 +28,22 @@ func (j *JSON) Valid(rule map[string][]string) (bool, []string) {
 	}
 	var errMsg []string
 	for fieldName, rulesOnField := range rule {
-		fieldPaths := strings.Split(fieldName, ".")
-		currentJsonLevel := sjson.GetPath(fieldPaths...)
-		if currentJsonLevel.Interface() == nil {
-			if stringInArray("required", rulesOnField) {
-				errMsg = append(errMsg, fmt.Sprintf(`field "%s" is required`, fieldName))
+		if len(rulesOnField)>0{
+			fieldPaths := strings.Split(fieldName, ".")
+			currentJsonLevel := sjson.GetPath(fieldPaths...)
+			if currentJsonLevel.Interface() == nil {
+				if stringInArray("required", rulesOnField) {
+					errMsg = append(errMsg, fmt.Sprintf(`field "%s" is required`, fieldName))
+				}
+				continue
 			}
-			continue
-		}
-		for _, oneRule := range rulesOnField {
-			ruleCommand := strings.Split(oneRule, ":")
-			if ruleFunc, ok := j.RegisterRules[ruleCommand[0]]; ok {
-				valid, errMessage := ruleFunc(oneRule, fieldName, currentJsonLevel.Interface())
-				if !valid {
-					errMsg = append(errMsg, errMessage)
+			for _, oneRule := range rulesOnField {
+				ruleCommand := strings.Split(oneRule, ":")
+				if ruleFunc, ok := j.RegisterRules[ruleCommand[0]]; ok {
+					valid, errMessage := ruleFunc(oneRule, fieldName, currentJsonLevel.Interface())
+					if !valid {
+						errMsg = append(errMsg, errMessage)
+					}
 				}
 			}
 		}
