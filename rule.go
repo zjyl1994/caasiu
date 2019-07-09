@@ -15,12 +15,19 @@ var builtinRules map[string]func(string, string, interface{}) (bool, string)
 
 func init() {
 	builtinRules = map[string]func(string, string, interface{}) (bool, string){
-		"string":  ruleString,
-		"integer": ruleInteger,
-		"regex":   ruleRegexp,
-		"in":      ruleIn,
-		"bool":    ruleBool,
-		"array":   ruleArray,
+		"string":    ruleString,
+		"integer":   ruleInteger,
+		"regex":     ruleRegexp,
+		"in":        ruleIn,
+		"bool":      ruleBool,
+		"array":     ruleArray,
+		
+		"ascii":     ruleASCII,
+		"alpha":     ruleAlpha,
+		"numeric":   ruleNumeric,
+		"hexstring": ruleHexString,
+		"printable": rulePrintableASCII,
+		"base64":    ruleBase64,
 	}
 }
 
@@ -127,4 +134,28 @@ func ruleArray(ruleName string, fieldName string, value interface{}) (bool, stri
 	} else {
 		return false, fmt.Sprintf(`field "%s" must be array`, fieldName)
 	}
+}
+
+func ruleASCII(ruleName string, fieldName string, value interface{}) (bool, string) {
+	return basicRegexpRule(ruleName, fieldName, value, "^[\x00-\x7F]+$", fmt.Sprintf(`field "%s" must ASCII string`, fieldName))
+}
+
+func ruleAlpha(ruleName string, fieldName string, value interface{}) (bool, string) {
+	return basicRegexpRule(ruleName, fieldName, value, "^[a-zA-Z]+$", fmt.Sprintf(`field "%s" must alpha string`, fieldName))
+}
+
+func ruleNumeric(ruleName string, fieldName string, value interface{}) (bool, string) {
+	return basicRegexpRule(ruleName, fieldName, value, "^[0-9]+$", fmt.Sprintf(`field "%s" must numeric string`, fieldName))
+}
+
+func ruleHexString(ruleName string, fieldName string, value interface{}) (bool, string) {
+	return basicRegexpRule(ruleName, fieldName, value, "^[0-9a-fA-F]+$", fmt.Sprintf(`field "%s" must hex string`, fieldName))
+}
+
+func rulePrintableASCII(ruleName string, fieldName string, value interface{}) (bool, string) {
+	return basicRegexpRule(ruleName, fieldName, value, "^[\x20-\x7E]+$", fmt.Sprintf(`field "%s" must printable ASCII string`, fieldName))
+}
+
+func ruleBase64(ruleName string, fieldName string, value interface{}) (bool, string) {
+	return basicRegexpRule(ruleName, fieldName, value, "^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}==|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{4})$", fmt.Sprintf(`field "%s" must base64 string`, fieldName))
 }
