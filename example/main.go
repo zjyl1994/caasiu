@@ -37,7 +37,7 @@ Body
 */
 
 func myHandler(w http.ResponseWriter, r *http.Request) {
-	c, err := caasiu.New(r, caasiu.Option{ExtraRule: nil})
+	c, err := caasiu.New(r)
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
 		return

@@ -11,14 +11,7 @@ type Caasiu struct {
 	queryString *QueryString
 }
 
-func New(r *http.Request, opts Option) (*Caasiu, error) {
-	if opts.ExtraRule != nil {
-		for ruleName, ruleFunc := range opts.ExtraRule {
-			if err := RegisterRule(ruleName, ruleFunc); err != nil {
-				return nil, err
-			}
-		}
-	}
+func New(r *http.Request) (*Caasiu, error) {
 	var caasiu Caasiu
 	caasiu.req = r
 	caasiu.queryString = NewQueryString(r.URL.Query())
