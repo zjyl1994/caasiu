@@ -63,9 +63,15 @@ func myHandler(w http.ResponseWriter, r *http.Request) {
 			"bool":              []string{"bool"},
 		},
 	})
+	qs := c.QueryString().Data()
+	js := c.Body().Data()
 	result := map[string]interface{}{
 		"valid":  valid,
 		"errMsg": errMsg,
+		"data": map[string]interface{}{
+			"param3": qs["param3"],
+			"data7":  js.GetPath("data7").MustInt(),
+		},
 	}
 	b, err := json.Marshal(result)
 	if err != nil {
