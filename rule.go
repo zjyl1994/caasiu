@@ -19,6 +19,8 @@ func init() {
 		"integer": ruleInteger,
 		"regex":   ruleRegexp,
 		"in":      ruleIn,
+		"bool":    ruleBool,
+		"array":   ruleArray,
 	}
 }
 
@@ -26,6 +28,19 @@ func ruleString(ruleName string, fieldName string, value interface{}) (bool, str
 	_, ok := value.(string)
 	if ok {
 		return true, ""
+	} else {
+		return false, fmt.Sprintf(`field "%s" must string`, fieldName)
+	}
+}
+
+func basicRegexpRule(ruleName string, fieldName string, value interface{}, regex string, errMsg string) (bool, string) {
+	valueString, ok := value.(string)
+	if ok {
+		if regexp.MustCompile(regex).MatchString(valueString) {
+			return true, ""
+		} else {
+			return false, errMsg
+		}
 	} else {
 		return false, fmt.Sprintf(`field "%s" must string`, fieldName)
 	}
@@ -42,7 +57,7 @@ func ruleInteger(ruleName string, fieldName string, value interface{}) (bool, st
 	default:
 		return false, errMsg
 	}
-	if regexp.MustCompile(regexInteger).Match([]byte(valueString)) {
+	if regexp.MustCompile(regexInteger).MatchString(valueString) {
 		return true, ""
 	} else {
 		return false, errMsg
@@ -68,7 +83,7 @@ func ruleRegexp(ruleName string, fieldName string, value interface{}) (bool, str
 	if err != nil {
 		return false, "illegal regexp"
 	}
-	if regex.Match([]byte(valueString)) {
+	if regex.MatchString(valueString) {
 		return true, ""
 	} else {
 		return false, fmt.Sprintf(`field "%s" not match "%s"`, fieldName, param)
@@ -95,5 +110,21 @@ func ruleIn(ruleName string, fieldName string, value interface{}) (bool, string)
 		return true, ""
 	} else {
 		return false, fmt.Sprintf(`field "%s" not in [%s]`, fieldName, param)
+	}
+}
+
+func ruleBool(ruleName string, fieldName string, value interface{}) (bool, string) {
+	if _, ok := value.(bool); ok {
+		return true, ""
+	} else {
+		return false, fmt.Sprintf(`field "%s" must be bool`, fieldName)
+	}
+}
+
+func ruleArray(ruleName string, fieldName string, value interface{}) (bool, string) {
+	if _, ok := value.([]interface{}); ok {
+		return true, ""
+	} else {
+		return false, fmt.Sprintf(`field "%s" must be array`, fieldName)
 	}
 }
