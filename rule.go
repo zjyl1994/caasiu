@@ -2,6 +2,7 @@ package caasiu
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -11,23 +12,36 @@ const (
 	regexInteger = "^\\d+$"
 )
 
-var builtinRules map[string]func(string, string, interface{}) (bool, string)
+var (
+	registerRules map[string]func(string, string, interface{}) (bool, string)
+
+	ErrAlreadyRegistered = errors.New("rule already registered")
+)
 
 func init() {
-	builtinRules = map[string]func(string, string, interface{}) (bool, string){
-		"string":    ruleString,
-		"integer":   ruleInteger,
-		"regex":     ruleRegexp,
-		"in":        ruleIn,
-		"bool":      ruleBool,
-		"array":     ruleArray,
-		
+	registerRules = map[string]func(string, string, interface{}) (bool, string){
+		"string":  ruleString,
+		"integer": ruleInteger,
+		"regex":   ruleRegexp,
+		"in":      ruleIn,
+		"bool":    ruleBool,
+		"array":   ruleArray,
+
 		"ascii":     ruleASCII,
 		"alpha":     ruleAlpha,
 		"numeric":   ruleNumeric,
 		"hexstring": ruleHexString,
 		"printable": rulePrintableASCII,
 		"base64":    ruleBase64,
+	}
+}
+
+func RegisterRule(ruleName string, ruleFunc func(string, string, interface{}) (bool, string)) error {
+	if _, ok := registerRules[ruleName]; ok {
+		return ErrAlreadyRegistered
+	} else {
+		registerRules[ruleName] = ruleFunc
+		return nil
 	}
 }
 

@@ -8,30 +8,26 @@ import (
 )
 
 type JSON struct {
-	RawJson       []byte                                                      // JSON 原文
-	RegisterRules map[string]func(string, string, interface{}) (bool, string) // 已注册的规则
+	rawJSON []byte
 }
 
 func NewJSON(json []byte, rules map[string]func(string, string, interface{}) (bool, string)) *JSON {
 	var result JSON
-	result.RawJson = json
-	result.RegisterRules = builtinRules
-	for ruleName, ruleFunc := range rules {
-		result.RegisterRules[ruleName] = ruleFunc
-	}
+	result.rawJSON = json
 	return &result
 }
+
 func (j *JSON) Valid(rule map[string][]string) (bool, []string) {
-	sjson, err := simplejson.NewJson(j.RawJson)
+	sjson, err := simplejson.NewJson(j.rawJSON)
 	if err != nil {
 		return false, []string{err.Error()}
 	}
 	var errMsg []string
 	for fieldName, rulesOnField := range rule {
-		if len(rulesOnField)>0{
+		if len(rulesOnField) > 0 {
 			fieldPaths := strings.Split(fieldName, ".")
-			currentJsonLevel := sjson.GetPath(fieldPaths...)
-			if currentJsonLevel.Interface() == nil {
+			currentJSONLevel := sjson.GetPath(fieldPaths...)
+			if currentJSONLevel.Interface() == nil {
 				if stringInArray("required", rulesOnField) {
 					errMsg = append(errMsg, fmt.Sprintf(`field "%s" is required`, fieldName))
 				}
@@ -39,8 +35,8 @@ func (j *JSON) Valid(rule map[string][]string) (bool, []string) {
 			}
 			for _, oneRule := range rulesOnField {
 				ruleCommand := strings.Split(oneRule, ":")
-				if ruleFunc, ok := j.RegisterRules[ruleCommand[0]]; ok {
-					valid, errMessage := ruleFunc(oneRule, fieldName, currentJsonLevel.Interface())
+				if ruleFunc, ok := registerRules[ruleCommand[0]]; ok {
+					valid, errMessage := ruleFunc(oneRule, fieldName, currentJSONLevel.Interface())
 					if !valid {
 						errMsg = append(errMsg, errMessage)
 					}
@@ -53,4 +49,13 @@ func (j *JSON) Valid(rule map[string][]string) (bool, []string) {
 	} else {
 		return true, nil
 	}
+}
+
+func (j *JSON) Data() *simplejson.Json {
+	sjson, _ := simplejson.NewJson(j.rawJSON)
+	return sjson
+}
+
+func (j *JSON) Raw() []byte {
+	return j.rawJSON
 }
