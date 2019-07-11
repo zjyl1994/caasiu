@@ -3,6 +3,8 @@ package caasiu
 import (
 	"io/ioutil"
 	"net/http"
+
+	simplejson "github.com/bitly/go-simplejson"
 )
 
 type Caasiu struct {
@@ -29,16 +31,20 @@ func New(r *http.Request) (*Caasiu, error) {
 	return &caasiu, nil
 }
 
-func (c *Caasiu) Body() *JSON {
-	return c.jsonBody
+func (c *Caasiu) QueryStringData() map[string]string {
+	if c.queryString == nil {
+		return nil
+	} else {
+		return c.queryString.Data()
+	}
 }
 
-func (c *Caasiu) IsJSONBody() bool {
-	return c.jsonBody != nil
-}
-
-func (c *Caasiu) QueryString() *QueryString {
-	return c.queryString
+func (c *Caasiu) JsonBodyData() *simplejson.Json {
+	if c.jsonBody == nil {
+		return nil
+	} else {
+		return c.jsonBody.Data()
+	}
 }
 
 func (c *Caasiu) Valid(rules Rules) (bool, []string) {

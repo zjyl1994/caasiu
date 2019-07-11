@@ -64,9 +64,9 @@ func myHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	})
 	var result map[string]interface{}
-	qs := c.QueryString().Data()
-	if c.IsJSONBody() {
-		js := c.Body().Data()
+	qs := c.QueryStringData()
+	js := c.JsonBodyData()
+	if js != nil {
 		result = map[string]interface{}{
 			"valid":  valid,
 			"errMsg": errMsg,
