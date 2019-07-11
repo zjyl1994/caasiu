@@ -63,15 +63,27 @@ func myHandler(w http.ResponseWriter, r *http.Request) {
 			"bool":              []string{"bool"},
 		},
 	})
+	var result map[string]interface{}
 	qs := c.QueryString().Data()
-	js := c.Body().Data()
-	result := map[string]interface{}{
-		"valid":  valid,
-		"errMsg": errMsg,
-		"data": map[string]interface{}{
-			"param3": qs["param3"],
-			"data7":  js.GetPath("data7").MustInt(),
-		},
+	if c.IsJSONBody() {
+		js := c.Body().Data()
+		result = map[string]interface{}{
+			"valid":  valid,
+			"errMsg": errMsg,
+			"data": map[string]interface{}{
+				"param3": qs["param3"],
+				"data7":  js.GetPath("data7").MustInt(),
+			},
+		}
+	} else {
+		result = map[string]interface{}{
+			"valid":  valid,
+			"errMsg": errMsg,
+			"data": map[string]interface{}{
+				"param3": qs["param3"],
+				"data7":  nil,
+			},
+		}
 	}
 	b, err := json.Marshal(result)
 	if err != nil {
